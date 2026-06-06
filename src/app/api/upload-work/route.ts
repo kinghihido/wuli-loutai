@@ -1,71 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
-
-const DATA_FILE = path.join(process.env.COZE_WORKSPACE_PATH || '/workspace/projects', 'data', 'site-data.json');
-
-interface LiteraryWork {
-  id: number;
-  title: string;
-  excerpt: string;
-  category: string;
-  date: string;
-  content: string;
-}
-
-interface SiteData {
-  hero: {
-    title: string;
-    subtitle: string;
-    description: string;
-  };
-  about: {
-    paragraphs: string[];
-    tags: string[];
-  };
-  literaryWorks: LiteraryWork[];
-  photographyWorks: Array<{
-    id: number;
-    title: string;
-    description: string;
-    category: string;
-    image: string;
-  }>;
-}
-
-function readData(): SiteData {
-  const dataDir = path.dirname(DATA_FILE);
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
-  }
-  if (!fs.existsSync(DATA_FILE)) {
-    return {
-      hero: { title: '', subtitle: '', description: '' },
-      about: { paragraphs: [], tags: [] },
-      literaryWorks: [],
-      photographyWorks: [],
-    };
-  }
-  try {
-    const content = fs.readFileSync(DATA_FILE, 'utf-8');
-    return JSON.parse(content);
-  } catch {
-    return {
-      hero: { title: '', subtitle: '', description: '' },
-      about: { paragraphs: [], tags: [] },
-      literaryWorks: [],
-      photographyWorks: [],
-    };
-  }
-}
-
-function writeData(data: SiteData) {
-  const dataDir = path.dirname(DATA_FILE);
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
-  }
-  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
-}
+import { readSiteData, writeSiteData } from '@/lib/kv-data';
+import type { LiteraryWork, SiteData } from '@/lib/kv-data';
 
 export async function POST(request: NextRequest) {
   try {
@@ -80,18 +15,12 @@ export async function POST(request: NextRequest) {
     }
 
     const textContent = content.trim();
-
-    // 生成摘要（取前100字）
     const excerpt = textContent.replace(/\n+/g, ' ').substring(0, 100) + '...';
 
-    // 读取现有数据
-    const data = readData();
-
-    // 生成新ID
-    const maxId = data.literaryWorks.reduce((max: number, work: LiteraryWork) => Math.max(max, work.id), 0);
+    const data = await readSiteData();
+    const maxId = data.literaryWorks.reduce((max, work) => Math.max(max, work.id), 0);
     const newId = maxId + 1;
 
-    // 创建新作品
     const newWork: LiteraryWork = {
       id: newId,
       title: title.trim(),
@@ -101,9 +30,8 @@ export async function POST(request: NextRequest) {
       content: textContent,
     };
 
-    // 添加到作品列表（放在最前面）
     data.literaryWorks.unshift(newWork);
-    writeData(data);
+    await writeSiteData(data);
 
     return NextResponse.json({ 
       success: true, 

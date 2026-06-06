@@ -1,67 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
-
-const DATA_FILE = path.join(process.env.COZE_WORKSPACE_PATH || '/workspace/projects', 'data', 'site-data.json');
-
-interface LiteraryWork {
-  id: number;
-  title: string;
-  excerpt: string;
-  category: string;
-  date: string;
-  content: string;
-}
-
-interface PhotographyWork {
-  id: number;
-  title: string;
-  description: string;
-  category: string;
-  image: string;
-  imageKey?: string;
-}
-
-interface SiteData {
-  hero: { title: string; subtitle: string; description: string };
-  about: { paragraphs: string[]; tags: string[] };
-  literaryWorks: LiteraryWork[];
-  photographyWorks: PhotographyWork[];
-}
-
-function readData(): SiteData {
-  const dataDir = path.dirname(DATA_FILE);
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
-  }
-  if (!fs.existsSync(DATA_FILE)) {
-    return {
-      hero: { title: '', subtitle: '', description: '' },
-      about: { paragraphs: [], tags: [] },
-      literaryWorks: [],
-      photographyWorks: [],
-    };
-  }
-  try {
-    const content = fs.readFileSync(DATA_FILE, 'utf-8');
-    return JSON.parse(content);
-  } catch {
-    return {
-      hero: { title: '', subtitle: '', description: '' },
-      about: { paragraphs: [], tags: [] },
-      literaryWorks: [],
-      photographyWorks: [],
-    };
-  }
-}
-
-function writeData(data: SiteData) {
-  const dataDir = path.dirname(DATA_FILE);
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
-  }
-  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
-}
+import { del } from '@vercel/blob';
+import { readSiteData, writeSiteData } from '@/lib/kv-data';
 
 // DELETE - 删除作品
 export async function DELETE(request: NextRequest) {
@@ -74,15 +13,25 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: '缺少参数' }, { status: 400 });
     }
 
-    const data = readData();
+    const data = await readSiteData();
 
     if (type === 'literary') {
       data.literaryWorks = data.literaryWorks.filter(w => w.id !== id);
     } else if (type === 'photography') {
+      // 删除摄影作品时，同时从 Blob 删除图片
+      const workToDelete = data.photographyWorks.find(w => w.id === id);
+      if (workToDelete?.image) {
+        try {
+          await del(workToDelete.image);
+        } catch (e) {
+          console.error('Failed to delete blob:', e);
+          // 不阻断主流程，即使 Blob 删除失败也继续删除记录
+        }
+      }
       data.photographyWorks = data.photographyWorks.filter(w => w.id !== id);
     }
 
-    writeData(data);
+    await writeSiteData(data);
     return NextResponse.json({ success: true, message: '删除成功' });
   } catch (error) {
     console.error('Delete error:', error);
@@ -100,13 +49,12 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: '缺少参数' }, { status: 400 });
     }
 
-    const data = readData();
+    const data = await readSiteData();
 
     if (type === 'literary') {
       const index = data.literaryWorks.findIndex(w => w.id === id);
       if (index !== -1) {
-        // 更新摘要
-        const excerpt = workData.content.replace(/\n+/g, ' ').substring(0, 100) + '...';
+        const excerpt = workData.content?.replace(/\n+/g, ' ').substring(0, 100) + '...' || data.literaryWorks[index].excerpt;
         data.literaryWorks[index] = { ...data.literaryWorks[index], ...workData, excerpt };
       }
     } else if (type === 'photography') {
@@ -116,7 +64,7 @@ export async function PUT(request: NextRequest) {
       }
     }
 
-    writeData(data);
+    await writeSiteData(data);
     return NextResponse.json({ success: true, message: '更新成功' });
   } catch (error) {
     console.error('Update error:', error);
