@@ -3,25 +3,16 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: {
-    default: '竞海西渡 | 文学与摄影',
-    template: '%s | 竞海西渡',
+    default: 'Black Geek | Personal Tech Hub',
+    template: '%s | Black Geek',
   },
-  description: '竞海西渡的文学与摄影作品集，记录生活中的诗意与光影',
-  keywords: [
-    '竞海西渡',
-    '文学',
-    '摄影',
-    '作品集',
-    '摄影作品',
-    '文学作品',
-    '诗人',
-    '摄影师',
-  ],
-  authors: [{ name: '竞海西渡' }],
+  description: 'Black 的个人极客空间 — 技术博客、AI 工具、项目展示、个人仪表盘',
+  keywords: ['Black', '极客', '技术博客', 'AI', 'GitHub', '北京大学'],
+  authors: [{ name: 'Black', url: 'https://github.com/kinghihido' }],
   generator: 'Next.js',
   openGraph: {
-    title: '竞海西渡 | 文学与摄影',
-    description: '用文字书写诗意，用镜头捕捉光影',
+    title: 'Black Geek | Personal Tech Hub',
+    description: '技术博客、AI 工具、项目展示、个人仪表盘',
     type: 'website',
     locale: 'zh_CN',
   },
@@ -38,7 +29,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-CN">
-      <body className={`antialiased`}>
+      <body className="antialiased">
         {children}
       </body>
     </html>
