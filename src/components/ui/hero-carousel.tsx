@@ -19,6 +19,7 @@ import {
   Pencil,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { put, del as blobDel } from '@vercel/blob/client';
 
 interface HeroImage {
   id: string;
@@ -76,47 +77,45 @@ export function HeroCarousel({ images, onChange, editMode, title, subtitle, desc
       return;
     }
     
-    // 验证文件大小 (50MB)
-    if (file.size > 50 * 1024 * 1024) {
-      setUploadError('图片文件过大，最大支持50MB');
-      return;
-    }
-    
     setIsUploading(true);
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      
-      const res = await fetch('/api/hero-image', {
-        method: 'POST',
-        body: formData,
+      // 客户端直传 Vercel Blob，绕过 Function 4.5MB 限制
+      const pathname = `hero/${Date.now()}_${Math.random().toString(36).substring(7)}.${ext}`;
+      const blob = await put(pathname, file, {
+        access: 'public',
+        handleUploadUrl: '/api/blob-upload',
+        contentType: file.type || 'image/jpeg',
       });
-      const data = await res.json();
-      
-      if (data.success && data.imageUrl) {
-        const newImage: HeroImage = {
-          id: `hero-${Date.now()}-${Math.random().toString(36).substring(7)}`,
-          url: data.imageUrl,
-        };
-        onChange([...images, newImage]);
-        setShowUploadModal(false);
-        setCurrentIndex(images.length); // 跳到新上传的图片
-      } else {
-        setUploadError(data.error || '上传失败，请重试');
-      }
+
+      const newImage: HeroImage = {
+        id: `hero-${Date.now()}-${Math.random().toString(36).substring(7)}`,
+        url: blob.url,
+      };
+      onChange([...images, newImage]);
+      setShowUploadModal(false);
+      setCurrentIndex(images.length);
     } catch (error) {
       console.error('Upload error:', error);
-      setUploadError('网络错误，上传失败');
+      setUploadError('上传失败，请重试');
     } finally {
       setIsUploading(false);
-      // 重置file input以便重复选择同一文件
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
     }
   }, [images, onChange]);
 
-  const handleDelete = useCallback((id: string) => {
+  const handleDelete = useCallback(async (id: string) => {
+    const image = images.find(img => img.id === id);
+    if (!image) return;
+
+    // 尝试从 Blob 存储中删除（失败也不阻塞 UI）
+    try {
+      await blobDel(image.url);
+    } catch (e) {
+      console.warn('Blob delete failed, skipping:', e);
+    }
+
     const newImages = images.filter(img => img.id !== id);
     onChange(newImages);
     if (currentIndex >= newImages.length) {
@@ -205,9 +204,18 @@ export function HeroCarousel({ images, onChange, editMode, title, subtitle, desc
                 className="border-2 border-dashed border-muted-foreground/25 rounded-xl p-12 text-center cursor-pointer hover:border-primary/50 hover:bg-muted/10 transition-all"
                 onClick={() => fileInputRef.current?.click()}
               >
-                <Upload className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
-                <p className="text-muted-foreground mb-1 font-medium">点击选择图片</p>
-                <p className="text-xs text-muted-foreground/60">支持 JPG, PNG, GIF, WebP, BMP, TIFF, SVG, HEIC 格式，最大 50MB</p>
+                {isUploading ? (
+                  <div className="flex flex-col items-center">
+                    <div className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin mb-3" />
+                    <p className="text-muted-foreground font-medium">上传中...</p>
+                  </div>
+                ) : (
+                  <>
+                    <Upload className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
+                    <p className="text-muted-foreground mb-1 font-medium">点击选择图片</p>
+                    <p className="text-xs text-muted-foreground/60">支持 JPG, PNG, GIF, WebP, BMP, TIFF, SVG, HEIC 格式</p>
+                  </>
+                )}
               </div>
               {uploadError && (
                 <p className="mt-3 text-sm text-destructive text-center">{uploadError}</p>
@@ -405,7 +413,7 @@ export function HeroCarousel({ images, onChange, editMode, title, subtitle, desc
                 <>
                   <Upload className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
                   <p className="text-muted-foreground mb-1 font-medium">点击选择图片</p>
-                  <p className="text-xs text-muted-foreground/60">支持 JPG, PNG, GIF, WebP, BMP, TIFF, SVG, HEIC 格式，最大 50MB</p>
+                  <p className="text-xs text-muted-foreground/60">支持 JPG, PNG, GIF, WebP, BMP, TIFF, SVG, HEIC 格式</p>
                 </>
               )}
             </div>

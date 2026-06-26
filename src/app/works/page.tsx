@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -32,6 +32,7 @@ import {
   ArrowLeft,
 } from 'lucide-react';
 import Link from 'next/link';
+import { put, del as blobDel } from '@vercel/blob/client';
 
 interface LiteraryWork {
   id: number;
@@ -190,34 +191,57 @@ export default function WorksPage() {
     }
   };
 
-  // 上传摄影作品（Edge Runtime，支持最大 128MB）
+  // 上传摄影作品（客户端直传 Vercel Blob，绕过 4.5MB 限制）
   const handlePhotoUpload = async () => {
     if (!photoForm.title.trim()) { alert('请输入作品标题'); return; }
     if (!photoFile) { alert('请选择图片文件'); return; }
     setIsUploadingPhoto(true);
     try {
-      const formData = new FormData();
-      formData.append('file', photoFile);
-      formData.append('title', photoForm.title);
-      formData.append('description', photoForm.description);
-      formData.append('category', photoForm.category);
-      const res = await fetch('/api/upload-photo', { method: 'POST', body: formData });
+      // Step 1: 客户端直传 Vercel Blob
+      const ext = photoFile.name.split('.').pop() || 'jpg';
+      const pathname = `photography/${Date.now()}_${Math.random().toString(36).substring(7)}.${ext}`;
+      const blob = await put(pathname, photoFile, {
+        access: 'public',
+        handleUploadUrl: '/api/blob-upload',
+        contentType: photoFile.type || 'image/jpeg',
+      });
+
+      // Step 2: 直传成功，保存元数据到 KV
+      const res = await fetch('/api/upload-photo-meta', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          imageUrl: blob.url,
+          title: photoForm.title,
+          description: photoForm.description,
+          category: photoForm.category,
+        }),
+      });
       const resData = await res.json();
       if (resData.success) {
         reloadData();
         setShowPhotoUploadModal(false);
         setPhotoForm({ title: '', description: '', category: '风光' });
         setPhotoFile(null); setPhotoPreview('');
-      } else { alert(resData.error || '上传失败'); }
-    } catch { alert('上传失败，请重试'); }
-    finally { setIsUploadingPhoto(false); }
+      } else { alert(resData.error || '保存失败'); }
+    } catch (err: unknown) {
+      console.error('Photo upload error:', err);
+      alert('上传失败，请重试');
+    } finally { setIsUploadingPhoto(false); }
   };
 
-  // 删除作品
+  // 删除作品（摄影作品同时删除 Blob 图片）
   const handleDelete = async () => {
     if (!deleteTarget) return;
     setIsDeleting(true);
     try {
+      // 摄影作品：先删除 Vercel Blob 中的原图
+      if (deleteTarget.type === 'photography') {
+        const work = data.photographyWorks.find(w => w.id === deleteTarget.id);
+        if (work?.image) {
+          try { await blobDel(work.image); } catch (e) { console.warn('Blob delete failed:', e); }
+        }
+      }
       const res = await fetch(`/api/work?type=${deleteTarget.type}&id=${deleteTarget.id}`, { method: 'DELETE' });
       const resData = await res.json();
       if (resData.success) { reloadData(); setDeleteTarget(null); }
