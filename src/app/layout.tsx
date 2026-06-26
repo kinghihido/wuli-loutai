@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     '摄影师',
   ],
   authors: [{ name: '竞海西渡' }],
-  generator: 'Coze Code',
+  generator: 'Next.js',
   openGraph: {
     title: '竞海西渡 | 文学与摄影',
     description: '用文字书写诗意，用镜头捕捉光影',
