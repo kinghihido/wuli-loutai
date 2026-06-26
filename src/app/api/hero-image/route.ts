@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { put } from '@vercel/blob';
 import { del } from '@vercel/blob';
 
+export const config = {
+  runtime: 'edge',
+};
+
 // 支持的图片格式
 const SUPPORTED_TYPES = [
   'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp',
@@ -28,12 +32,11 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // Vercel Blob 最大支持约 500MB，但函数体限制 4.5MB
-    // 对于大文件，建议前端压缩后再上传
-    const MAX_FILE_SIZE = 4.5 * 1024 * 1024; // 4.5MB（Vercel 函数体限制）
+    // Edge Runtime 支持最大 128MB，这里限制为 100MB
+    const MAX_FILE_SIZE = 100 * 1024 * 1024;
     if (file.size > MAX_FILE_SIZE) {
       return NextResponse.json({ 
-        error: `图片文件过大（${(file.size / 1024 / 1024).toFixed(1)}MB），Vercel 函数体限制 4.5MB。请压缩图片后重试。` 
+        error: `图片文件过大（${(file.size / 1024 / 1024).toFixed(1)}MB），最大支持 100MB。请压缩图片后重试。` 
       }, { status: 400 });
     }
 
@@ -66,10 +69,10 @@ export async function DELETE(request: NextRequest) {
     if (!url) {
       return NextResponse.json({ error: '缺少图片 URL' }, { status: 400 });
     }
-
+    
     // 从 Vercel Blob 删除
     await del(url);
-
+    
     return NextResponse.json({ success: true, message: '图片已删除' });
   } catch (error) {
     console.error('Delete hero image error:', error);

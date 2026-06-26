@@ -3,6 +3,10 @@ import { put } from '@vercel/blob';
 import { readSiteData, writeSiteData } from '@/lib/kv-data';
 import type { PhotographyWork } from '@/lib/kv-data';
 
+export const config = {
+  runtime: 'edge',
+};
+
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();

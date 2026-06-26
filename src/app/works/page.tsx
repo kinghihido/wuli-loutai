@@ -190,7 +190,7 @@ export default function WorksPage() {
     }
   };
 
-  // 上传摄影作品
+  // 上传摄影作品（Edge Runtime，支持最大 128MB）
   const handlePhotoUpload = async () => {
     if (!photoForm.title.trim()) { alert('请输入作品标题'); return; }
     if (!photoFile) { alert('请选择图片文件'); return; }

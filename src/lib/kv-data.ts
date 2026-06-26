@@ -92,7 +92,14 @@ export const defaultSiteData: SiteData = {
  */
 export async function readSiteData(): Promise<SiteData> {
   try {
-    const data = await kv.get<SiteData>(SITE_DATA_KEY);
+    const raw = await kv.get(SITE_DATA_KEY);
+    // 兼容旧数据：如果存的还是 JSON 字符串，先解析
+    let data: SiteData | null = null;
+    if (typeof raw === 'string') {
+      try { data = JSON.parse(raw); } catch { data = null; }
+    } else {
+      data = raw as SiteData | null;
+    }
     if (!data) {
       return { ...defaultSiteData };
     }
@@ -113,7 +120,7 @@ export async function readSiteData(): Promise<SiteData> {
  * 写入站点数据（整体覆盖）
  */
 export async function writeSiteData(data: SiteData): Promise<void> {
-  await kv.set(SITE_DATA_KEY, JSON.stringify(data));
+  await kv.set(SITE_DATA_KEY, data);
 }
 
 /**
