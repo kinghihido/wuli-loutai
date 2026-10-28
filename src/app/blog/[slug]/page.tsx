@@ -1,11 +1,15 @@
 import { Navbar } from '@/components/navbar';
 import { Footer } from '@/components/footer';
-import { getPostBySlug } from '@/lib/blog';
+import { getPostBySlug, getAllPosts } from '@/lib/blog';
 import { Calendar, Clock, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+
+export function generateStaticParams() {
+  return getAllPosts().map((post) => ({ slug: post.slug }));
+}
 
 export default async function BlogPostPage({
   params,
