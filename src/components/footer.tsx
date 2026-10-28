@@ -1,18 +1,30 @@
-import { Terminal } from 'lucide-react';
+import Link from 'next/link';
 
 export function Footer() {
   return (
-    <footer className="py-8 px-6 border-t border-border">
-      <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <div className="w-6 h-6 rounded bg-primary/10 flex items-center justify-center">
-            <Terminal className="w-3 h-3 text-primary" />
+    <footer className="py-10 px-6 border-t border-border">
+      <div className="max-w-5xl mx-auto">
+        <div className="ink-line mb-6" />
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="seal-stamp" style={{ width: '2rem', height: '2rem', fontSize: '0.7rem' }}>
+              楼
+            </div>
+            <span className="font-serif text-sm tracking-wider text-muted-foreground">
+              雾里楼台
+            </span>
           </div>
-          <span>Black Geek</span>
+          <p className="font-serif text-sm text-muted-foreground tracking-wide">
+            &copy; {new Date().getFullYear()} &middot; 笔墨之间，自有天地
+          </p>
+          <Link
+            href="https://github.com/kinghihido/wuli-loutai"
+            target="_blank"
+            className="text-xs text-muted-foreground hover:text-primary transition-colors font-serif"
+          >
+            源码
+          </Link>
         </div>
-        <p className="text-sm text-muted-foreground">
-          &copy; {new Date().getFullYear()} Black. Built with Next.js & Tailwind.
-        </p>
       </div>
     </footer>
   );

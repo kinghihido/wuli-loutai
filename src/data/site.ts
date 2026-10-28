@@ -13,13 +13,13 @@ export interface SiteInfo {
 
 export const siteInfo: SiteInfo = {
   name: 'Black',
-  title: 'Black Geek',
-  subtitle: 'AI 时代的技术探索者',
-  description: '北京大学研究人员，专注于 AI 技术应用、范德华材料转移研究（EDL 方法）。热爱编程，沉迷 AI 工具链。',
+  title: '雾里楼台',
+  subtitle: '笔墨之间，自有天地',
+  description: '一个北大学生的创作空间。记录日常感悟、学术思考与随想杂记。雾里看花，楼台望月，皆是文章。',
   github: 'https://github.com/kinghihido',
   email: '2500011140@stu.pku.edu.cn',
   location: '北京 · 燕园',
-  role: '北京大学 · 研究人员 / 学生',
+  role: '北京大学 · 材料方向',
   skills: [
     'TypeScript', 'React', 'Next.js', 'Python',
     'Tailwind CSS', 'shadcn/ui', 'Git', 'Vercel',

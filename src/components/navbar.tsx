@@ -4,38 +4,39 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import {
-  Home,
   BookOpen,
   Wrench,
   FolderGit2,
   User,
-  Terminal,
 } from 'lucide-react';
 
 const navItems = [
-  { href: '/', label: '仪表盘', icon: Home },
-  { href: '/blog', label: '博客', icon: BookOpen },
-  { href: '/tools', label: 'AI 工具', icon: Wrench },
-  { href: '/projects', label: '项目', icon: FolderGit2 },
-  { href: '/about', label: '关于', icon: User },
+  { href: '/', label: '序', fullLabel: '序章', icon: null },
+  { href: '/blog', label: '文', fullLabel: '文章', icon: BookOpen },
+  { href: '/tools', label: '器', fullLabel: '工具', icon: Wrench },
+  { href: '/projects', label: '作', fullLabel: '项目', icon: FolderGit2 },
+  { href: '/about', label: '我', fullLabel: '关于', icon: User },
 ];
 
 export function Navbar() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
-      <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center group-hover:scale-105 transition-transform">
-            <Terminal className="w-4 h-4 text-primary-foreground" />
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-md border-b border-border">
+      <div className="max-w-5xl mx-auto px-6 py-3 flex items-center justify-between">
+        {/* 站名 — 仿印章 */}
+        <Link href="/" className="flex items-center gap-3 group">
+          <div className="seal-stamp group-hover:scale-105 transition-transform">
+            雾
           </div>
-          <span className="font-semibold text-lg tracking-tight">Black Geek</span>
+          <span className="font-serif font-semibold text-lg tracking-widest hidden sm:inline">
+            雾里楼台
+          </span>
         </Link>
 
+        {/* 桌面端导航 — 仿古籍目录 */}
         <div className="hidden md:flex items-center gap-1">
           {navItems.map((item) => {
-            const Icon = item.icon;
             const isActive = item.href === '/'
               ? pathname === '/'
               : pathname.startsWith(item.href);
@@ -44,23 +45,22 @@ export function Navbar() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+                  'flex items-center gap-1.5 px-4 py-2 rounded text-sm font-serif tracking-wider transition-all',
                   isActive
-                    ? 'bg-primary/10 text-primary'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                    ? 'text-primary bg-primary/8'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
                 )}
               >
-                <Icon className="w-4 h-4" />
-                {item.label}
+                <span className="font-semibold">{item.label}</span>
+                <span className="text-xs opacity-60 hidden lg:inline">{item.fullLabel}</span>
               </Link>
             );
           })}
         </div>
 
-        {/* Mobile nav */}
-        <div className="flex md:hidden items-center gap-1">
+        {/* 移动端导航 */}
+        <div className="flex md:hidden items-center gap-0.5">
           {navItems.map((item) => {
-            const Icon = item.icon;
             const isActive = item.href === '/'
               ? pathname === '/'
               : pathname.startsWith(item.href);
@@ -69,13 +69,13 @@ export function Navbar() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'p-2 rounded-lg transition-colors',
+                  'w-9 h-9 flex items-center justify-center rounded text-sm font-serif transition-all',
                   isActive
-                    ? 'bg-primary/10 text-primary'
+                    ? 'text-primary bg-primary/8'
                     : 'text-muted-foreground hover:text-foreground'
                 )}
               >
-                <Icon className="w-4 h-4" />
+                {item.label}
               </Link>
             );
           })}
