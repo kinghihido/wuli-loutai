@@ -1,8 +1,29 @@
-# projects
+# 层林尽染
 
-这是一个基于 [Next.js 16](https://nextjs.org) + [shadcn/ui](https://ui.shadcn.com) 的全栈应用项目，极客性质，记录生活。
+技术流内容站。记录 AI 工具链的演化、范德华材料转移的实验方法，以及前端工程化的踩坑。
 
-从2026年开始，我会不断地完善这个仓库，使它成为一个真正的数字资产。
+主色取朱砂红（层林尽染），纸色为底、宋体为骨。基于 [Next.js 16](https://nextjs.org) + [shadcn/ui](https://ui.shadcn.com)。
+
+当前三篇：
+
+| 文件 | 主题 |
+| --- | --- |
+| `content/blog/ai-toolchain-evolution.md` | AI 工具链演进 |
+| `content/blog/edl-vdw-research.md` | EDL 方法 · 范德华材料转移 |
+| `content/blog/nextjs-shadcn-guide.md` | Next.js + shadcn/ui 工程化 |
+
+## 站点矩阵里的位置
+
+这个站是「集大成者」总台下的三个并列内容站之一：
+
+| 站 | 主色 | 内容 |
+| --- | --- | --- |
+| **层林尽染**（本仓库） | 朱砂红 | 技术流 |
+| [学海无涯](https://github.com/kinghihido/paper-reading) | 苍蓝 | 文献精读，22 篇报告 |
+| [燕园](https://github.com/kinghihido/yanyuan-poi) | 雾绿 | 北大校内 POI 地图 |
+| [集大成者](https://github.com/kinghihido/jidacheng) | 墨 | 总台，负责把上面这些指出来 |
+
+仓库名仍是 `wuli-loutai`，`next.config.ts` 里的 `basePath` 对应保留，改名会打断已部署的链接。
 
 ## 快速开始
 

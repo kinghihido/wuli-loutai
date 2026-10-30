@@ -8,14 +8,14 @@ export function Footer() {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="seal-stamp" style={{ width: '2rem', height: '2rem', fontSize: '0.7rem' }}>
-              楼
+              染
             </div>
             <span className="font-serif text-sm tracking-wider text-muted-foreground">
-              雾里楼台
+              层林尽染
             </span>
           </div>
           <p className="font-serif text-sm text-muted-foreground tracking-wide">
-            &copy; {new Date().getFullYear()} &middot; 笔墨之间，自有天地
+            &copy; {new Date().getFullYear()} &middot; 万山红遍，层林尽染
           </p>
           <Link
             href="https://github.com/kinghihido/wuli-loutai"

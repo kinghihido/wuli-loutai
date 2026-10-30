@@ -27,10 +27,10 @@ export function Navbar() {
         {/* 站名 — 仿印章 */}
         <Link href="/" className="flex items-center gap-3 group">
           <div className="seal-stamp group-hover:scale-105 transition-transform">
-            雾
+            层
           </div>
           <span className="font-serif font-semibold text-lg tracking-widest hidden sm:inline">
-            雾里楼台
+            层林尽染
           </span>
         </Link>
 
