@@ -1,4 +1,4 @@
 1:"$Sreact.fragment"
 2:I[62218,["/wuli-loutai/_next/static/chunks/7161629d4b1f23ac.js","/wuli-loutai/_next/static/chunks/5419f37d97b078d5.js"],"default"]
 3:I[63512,["/wuli-loutai/_next/static/chunks/7161629d4b1f23ac.js","/wuli-loutai/_next/static/chunks/5419f37d97b078d5.js"],"default"]
-0:{"buildId":"NBaUdTgOJ5GNSopZQV51s","rsc":["$","$1","c",{"children":[null,["$","$L2",null,{"parallelRouterKey":"children","template":["$","$L3",null,{}]}]]}],"loading":null,"isPartial":false}
+0:{"buildId":"HHsuYyzJFLOQU1zy82-YP","rsc":["$","$1","c",{"children":[null,["$","$L2",null,{"parallelRouterKey":"children","template":["$","$L3",null,{}]}]]}],"loading":null,"isPartial":false}
